@@ -127,6 +127,61 @@ const mediaPackageTemplates = [
     }
 ];
 
+
+const customPresets = [
+  {
+    name: '_cmaf_64kbits_aacv2',
+    file: './lib/mediaconvert/custom_presets/_cmaf_64kbits_aacv2.json'
+  },
+  {
+    name: '_cmaf_234p_avc',
+    file: './lib/mediaconvert/custom_presets/_cmaf_234p_avc.json'
+  },
+  {
+    name: '_cmaf_360p_avc',
+    file: './lib/mediaconvert/custom_presets/_cmaf_360p_avc.json'
+  },
+  {
+    name: '_cmaf_540p_avc',
+    file: './lib/mediaconvert/custom_presets/_cmaf_540p_avc.json'
+  },
+  {
+    name: '_cmaf_720p_avc',
+    file: './lib/mediaconvert/custom_presets/_cmaf_720p_avc.json'
+  },
+  {
+    name: '_cmaf_720p_avc_WIFI',
+    file: './lib/mediaconvert/custom_presets/_cmaf_720p_avc_WIFI.json'
+  },
+  {
+    name: '_cmaf_1080p_avc',
+    file: './lib/mediaconvert/custom_presets/_cmaf_1080p_avc.json'
+  }
+];
+
+const customTemplates = [
+  {
+    name: '_234p',
+    file: './lib/mediaconvert/custom_templates/_234p.json'
+  },
+  {
+    name: '_360p',
+    file: './lib/mediaconvert/custom_templates/_360p.json'
+  },
+  {
+    name: '_540p',
+    file: './lib/mediaconvert/custom_templates/_540p.json'
+  },
+  {
+    name: '_720p',
+    file: './lib/mediaconvert/custom_templates/_720p.json'
+  },
+  {
+    name: '_1080p',
+    file: './lib/mediaconvert/custom_templates/_1080p.json'
+  }
+];
+
 // Get the Account regional MediaConvert endpoint for making API calls
 const GetEndpoints = async () => {
     const mediaconvert = new AWS.MediaConvert();
@@ -190,12 +245,12 @@ const Create = async (config) => {
     try {
         if (config.EnableMediaPackage === 'true') {
             // Use qvbr presets but Media Package templates
-            presets = qvbrPresets;
+            presets = customPresets;
             templates = mediaPackageTemplates;
         } else {
             // Use qvbr presets and templates
-            presets = qvbrPresets;
-            templates = qvbrTemplates;
+            presets = customPresets;
+            templates = customTemplates;
         }
 
         await _createPresets(mediaconvert, presets, config.StackName);
@@ -228,12 +283,12 @@ const Update = async (config) => {
         if (config.EnableMediaPackage != enableMediaPackage) {
             if (config.EnableMediaPackage == 'true') {
                 console.log('Deleting qvbr templates and creating MediaPackage templates');
-                await _deleteTemplates(mediaconvert, qvbrTemplates, config.StackName);
+                await _deleteTemplates(mediaconvert, customTemplates, config.StackName);
                 await _createTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
             } else {
                 console.log('Deleting MediaPackage templates and creating qvbr templates');
                 await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
-                await _createTemplates(mediaconvert, qvbrTemplates, config.StackName);
+                await _createTemplates(mediaconvert, customTemplates, config.StackName);
             }
         } else {
             console.log('No changes to the MediaConvert templates');
@@ -279,12 +334,12 @@ const Delete = async (config) => {
 
         if (config.EnableMediaPackage === 'true') {
             // Use qvbr presets but Media Package templates
-            presets = qvbrPresets;
+            presets = customPresets;
             templates = mediaPackageTemplates;
         } else {
             // Use qvbr presets and templates
-            presets = qvbrPresets;
-            templates = qvbrTemplates;
+            presets = customPresets;
+            templates = customTemplates;
         }
 
         await _deletePresets(mediaconvert, presets, config.StackName);

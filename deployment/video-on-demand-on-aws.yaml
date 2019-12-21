@@ -38,6 +38,34 @@ Parameters:
       - Yes
       - No
 
+  EnablePortraitProfile:
+    Description: If enabled, profile will determine based on portrait source videos
+    Type: String
+    Default: Yes
+    AllowedValues:
+      - Yes
+      - No
+
+  Environment:
+    Description: Used to tag resources with env value
+    Type: String
+  
+  CloudFrontAlias:
+    Description: The cname to use for the cdn distribution
+    Type: String
+
+  SNSNewVideoCallbackURL:
+    Description: The webhook for sns events
+    Type: String
+
+  SNSWorkflowCallbackURL:
+    Description: The webhook for sns events
+    Type: String
+
+  CloudFrontCertARN:
+    Description: The ARN of the certificate used for any cname aliases on cloudfront
+    Type: String
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -131,6 +159,8 @@ Resources:
                 Action:
                   - mediaconvert:CreatePreset
                   - mediaconvert:CreateJobTemplate
+                  - mediaconvert:UpdatePreset
+                  - mediaconvert:UpdateJobTemplate
                   - mediaconvert:DeletePreset
                   - mediaconvert:DeleteJobTemplate
                   - mediaconvert:DescribeEndpoints
@@ -350,6 +380,8 @@ Resources:
         AttributeType: S
       - AttributeName: startTime
         AttributeType: S
+      - AttributeName: srcVideo
+        AttributeType: S
       KeySchema:
       - AttributeName: guid
         KeyType: HASH
@@ -361,6 +393,13 @@ Resources:
             KeyType: HASH
           - AttributeName: startTime
             KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        -
+          IndexName: srcVideo-index
+          KeySchema:
+          - AttributeName: srcVideo
+            KeyType: HASH
           Projection:
             ProjectionType: ALL
       TableName: !Ref AWS::StackName
@@ -449,6 +488,37 @@ Resources:
           - id: W51
             reason: "Bucket is private and does not need a bucket policy"
 
+  SnsUploadVideoTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+      DisplayName: !Sub ${AWS::StackName}-UploadVideoNotifications
+      Subscription:
+        -
+          Endpoint: !Ref SNSNewVideoCallbackURL
+          Protocol: https
+
+  UploadVideoTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: SNS:Publish
+            Resource: "*"
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Join ['', ['arn:aws:s3:*:*:', Ref: Source]]
+      Topics:
+        - !Ref SnsUploadVideoTopic
+
   SnsTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -495,7 +565,8 @@ Resources:
           ViewerProtocolPolicy: allow-all
         PriceClass: PriceClass_100
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref CloudFrontCertARN
+          SslSupportMethod: sni-only
 
   S3Config:
     DependsOn: CloudFront
@@ -506,6 +577,7 @@ Resources:
       IngestArn: !GetAtt StepFunctions.Arn
       Resource: S3Notification
       WorkflowTrigger: !Ref WorkflowTrigger
+      TopicArn: !Ref SnsUploadVideoTopic
 
   MediaConvertEndPoint:
     Type: Custom::LoadLambda
@@ -516,6 +588,9 @@ Resources:
   MediaConvertTemplates:
     Type: Custom::LoadLambda
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       ServiceToken: !GetAtt CustomResource.Arn
       Resource: "MediaConvertTemplates"
       StackName: !Sub ${AWS::StackName}
@@ -534,6 +609,9 @@ Resources:
   CustomResource:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-custom-resource
       Description: Used to deploy resources not supported by CloudFormation
       Handler: index.handler
@@ -682,15 +760,31 @@ Resources:
             !If
               - IsMediaPackageEnabled
               - !Sub "${AWS::StackName}_Ott_1080p_Avc_Aac_16x9_mvod"
-              - !Sub "${AWS::StackName}_Ott_1080p_Avc_Aac_16x9_qvbr"
+              - !Sub "${AWS::StackName}_1080p"
           MediaConvert_Template_720p:
             !If
               - IsMediaPackageEnabled
               - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
-              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_qvbr"
+              - !Sub "${AWS::StackName}_720p"
+          MediaConvert_Template_540p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_540p"
+          MediaConvert_Template_360p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_360p"
+          MediaConvert_Template_234p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_234p"
           CloudFront: !GetAtt CloudFront.DomainName
           EnableMediaPackage: !Ref EnableMediaPackage
           InputRotate: DEGREE_0
+
 
   MediainfoRole:
     Type: AWS::IAM::Role
@@ -873,6 +967,8 @@ Resources:
         Variables:
           DynamoDBTable: !Ref DynamoDBTable
           ErrorHandler: !GetAtt ErrorHandler.Arn
+          EnablePortraitProfile: !Ref EnablePortraitProfile
+
 
   EncodeRole:
     Type: AWS::IAM::Role
