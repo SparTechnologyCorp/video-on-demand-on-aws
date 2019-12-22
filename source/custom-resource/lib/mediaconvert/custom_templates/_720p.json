@@ -23,7 +23,7 @@
             "NameModifier": "_720p_avc"
           },
           {
-            "Preset": "cmaf_64kbits_aacv2",
+            "Preset": "_cmaf_64kbits_aacv2",
             "NameModifier": "_audioL"
           }
         ],
