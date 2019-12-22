@@ -1,0 +1,25 @@
+{
+    "AudioDescriptions": [
+      {
+        "AudioTypeControl": "FOLLOW_INPUT",
+        "AudioSourceName": "Audio Selector 1",
+        "CodecSettings": {
+          "Codec": "AAC",
+          "AacSettings": {
+            "AudioDescriptionBroadcasterMix": "NORMAL",
+            "Bitrate": 64000,
+            "RateControlMode": "CBR",
+            "CodecProfile": "HEV2",
+            "CodingMode": "CODING_MODE_2_0",
+            "RawFormat": "NONE",
+            "SampleRate": 48000,
+            "Specification": "MPEG4"
+          }
+        },
+        "LanguageCodeControl": "FOLLOW_INPUT"
+      }
+    ],
+    "ContainerSettings": {
+      "Container": "CMFC"
+    }
+}

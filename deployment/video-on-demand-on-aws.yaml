@@ -9,7 +9,7 @@ Parameters:
   WorkflowTrigger:
     Description: How the workflow will be triggered (source video upload to S3 or source metadata file upload)
     Type: String
-    Default: VideoFile
+    Default: MetadataFile
     AllowedValues:
       - VideoFile
       - MetadataFile
@@ -17,7 +17,7 @@ Parameters:
   Glacier:
     Description: If enabled, source assets will be tagged for archiving to Glacier once the workflow is complete
     Type: String
-    Default: No
+    Default: Yes
     AllowedValues:
       - Yes
       - No
@@ -25,7 +25,7 @@ Parameters:
   FrameCapture:
     Description: If enabled, frame capture is added to the job submitted to MediaConvert
     Type: String
-    Default: No
+    Default: Yes
     AllowedValues:
       - Yes
       - No
@@ -410,7 +410,7 @@ Resources:
             reason: "Table name is set to the stack name"
 
   Source:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Type: AWS::S3::Bucket
     Properties:
       LoggingConfiguration:
@@ -444,7 +444,7 @@ Resources:
             reason: "Bucket is private and does not need a bucket policy"
 
   Destination:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Type: AWS::S3::Bucket
     Properties:
       LoggingConfiguration:
@@ -467,7 +467,7 @@ Resources:
               SSEAlgorithm: AES256
 
   Logs:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: LogDeliveryWrite
@@ -538,6 +538,9 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        IPV6Enabled: true
+        Aliases:
+          - !Ref CloudFrontAlias
         Origins:
           - DomainName: !Sub "${Destination}.s3.${AWS::Region}.amazonaws.com"
             Id: vodS3Origin
@@ -596,6 +599,7 @@ Resources:
       StackName: !Sub ${AWS::StackName}
       EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
       EnableMediaPackage: !Ref EnableMediaPackage
+      Forceupdate: true
 
   MediaPackageVod:
     Type: Custom::LoadLambda
@@ -612,6 +616,8 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
+        - Key: Role
+          Value: vod
       FunctionName: !Sub ${AWS::StackName}-custom-resource
       Description: Used to deploy resources not supported by CloudFormation
       Handler: index.handler
@@ -789,6 +795,9 @@ Resources:
   MediainfoRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -893,6 +902,9 @@ Resources:
   DynamodbUpdate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-dynamo
       Description: Updates DynamoDB with event data
       Handler: index.handler

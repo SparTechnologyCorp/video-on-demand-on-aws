@@ -1,0 +1,47 @@
+{
+  "Name": "_540p",
+  "Settings": {
+    "OutputGroups": [
+      {
+        "Name": "CMAF",
+        "Outputs": [
+          {
+            "Preset": "_cmaf_234p_avc",
+            "NameModifier": "_234p_avc"
+          },
+          {
+            "Preset": "_cmaf_360p_avc",
+            "NameModifier": "_360p_avc"
+          },
+          {
+            "Preset": "_cmaf_540p_avc",
+            "NameModifier": "_540p_avc"
+          },
+          {
+            "Preset": "_cmaf_64kbits_aacv2",
+            "NameModifier": "_audioL"
+          }
+        ],
+        "OutputGroupSettings": {
+          "Type": "CMAF_GROUP_SETTINGS",
+          "CmafGroupSettings": {
+            "WriteHlsManifest": "ENABLED",
+            "WriteDashManifest": "DISABLED",
+            "SegmentLength": 6,
+            "MinFinalSegmentLength": 0,
+            "FragmentLength": 2,
+            "SegmentControl": "SINGLE_FILE",
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "StreamInfResolution": "INCLUDE",
+            "ClientCache": "ENABLED",
+            "ManifestCompression": "NONE",
+            "CodecSpecification": "RFC_6381"
+          }
+        }
+      }
+    ],
+    "AdAvailOffset": 0
+  },
+  "StatusUpdateInterval": "SECONDS_60",
+  "Priority": 0
+}

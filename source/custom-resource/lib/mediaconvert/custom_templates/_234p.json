@@ -1,0 +1,39 @@
+{
+  "Name": "_234p",
+  "Settings": {
+    "OutputGroups": [
+      {
+        "Name": "CMAF",
+        "Outputs": [
+          {
+            "Preset": "_cmaf_234p_avc",
+            "NameModifier": "_234p_avc"
+          },
+          {
+            "Preset": "System-Ott_Cmaf_Cmfc_Aac_He_64Kbps",
+            "NameModifier": "_audioL"
+          }
+        ],
+        "OutputGroupSettings": {
+          "Type": "CMAF_GROUP_SETTINGS",
+          "CmafGroupSettings": {
+            "WriteHlsManifest": "ENABLED",
+            "WriteDashManifest": "DISABLED",
+            "SegmentLength": 6,
+            "MinFinalSegmentLength": 0,
+            "FragmentLength": 2,
+            "SegmentControl": "SINGLE_FILE",
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "StreamInfResolution": "INCLUDE",
+            "ClientCache": "ENABLED",
+            "ManifestCompression": "NONE",
+            "CodecSpecification": "RFC_6381"
+          }
+        }
+      }
+    ],
+    "AdAvailOffset": 0
+  },
+  "StatusUpdateInterval": "SECONDS_60",
+  "Priority": 0
+}
