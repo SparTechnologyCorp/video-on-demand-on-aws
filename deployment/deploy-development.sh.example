@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e 
+
+if [ -z "$1" ]; then
+    echo "Please provide a version number"
+    echo "For example: ./deploy-development.sh 1.1"
+    exit 1
+fi
+
+# Build the new version
+sh build-s3-dist.sh staging-vod video-on-demand-on-aws $1
+
+# Upload the new version
+aws s3 cp ./regional-s3-assets/ s3://staging-vod-us-east-1/video-on-demand-on-aws/$1/ --recursive --acl bucket-owner-full-control --profile my-us-east-profile
+
+cd regional-s3-assets/
+aws cloudformation deploy --s3-bucket staging-vod-us-east-1 --template-file video-on-demand-on-aws.template --stack-name staging-vod --capabilities CAPABILITY_IAM --profile my-us-east-profile --parameter-overrides WorkflowTrigger=MetadataFile CloudFrontAlias=videos.myapp.com CloudFrontCertARN=arn:aws:acm:us-east-1:my-acm-cert SNSNewVideoCallbackURL=https://webhooks.myapp.com/new_video SNSWorkflowCallbackURL=https://webhooks.myapp.com/vod_status Environment=staging EnablePortraitProfile=true EnableMediaPackage=false FrameCapture=true Glacier=true
+
+cd ..
+echo "$1" > development_version 
+
+
+

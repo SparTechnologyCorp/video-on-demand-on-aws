@@ -40,7 +40,6 @@ exports.handler = async (event, context) => {
                 case 'MediaConvertTemplates':
                     await MediaConvert.createTemplates(config);
                     break;
-
                 case ('UUID'):
                     responseData = {
                         UUID: uuidv4()

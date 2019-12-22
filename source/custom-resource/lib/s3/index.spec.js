@@ -28,6 +28,7 @@ const _video = {
 const _metadata = {
     WorkflowTrigger: 'MetadataFile',
     IngestArn: 'arn',
+    TargetArn: 'arn',
     Source: 'srcBucket'
 };
 

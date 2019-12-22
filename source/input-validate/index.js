@@ -39,6 +39,9 @@ exports.handler = async (event) => {
             jobTemplate_2160p: process.env.MediaConvert_Template_2160p,
             jobTemplate_1080p: process.env.MediaConvert_Template_1080p,
             jobTemplate_720p: process.env.MediaConvert_Template_720p,
+            jobTemplate_540p: process.env.MediaConvert_Template_540p,
+            jobTemplate_360p: process.env.MediaConvert_Template_360p,
+            jobTemplate_234p: process.env.MediaConvert_Template_234p,
 
             // https://github.com/awslabs/video-on-demand-on-aws/pull/27
             // Rotation support

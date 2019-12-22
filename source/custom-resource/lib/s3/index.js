@@ -108,7 +108,21 @@ let PutNotification = async (config) => {
                                 }
                             }
                         }
-                        ]
+                        ],
+                        TopicConfigurations: [{
+                            Events: ["s3:ObjectCreated:*"],
+                            TopicArn: config.TopicArn,
+                            Filter: {
+                                Key: {
+                                    FilterRules: [
+                                        {
+                                            Name: "suffix",
+                                            Value: ".mp4"
+                                        }
+                                    ]
+                                }
+                            }
+                        }]
                     }
                 };
 

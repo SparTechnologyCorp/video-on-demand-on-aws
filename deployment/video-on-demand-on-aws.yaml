@@ -9,7 +9,7 @@ Parameters:
   WorkflowTrigger:
     Description: How the workflow will be triggered (source video upload to S3 or source metadata file upload)
     Type: String
-    Default: VideoFile
+    Default: MetadataFile
     AllowedValues:
       - VideoFile
       - MetadataFile
@@ -17,7 +17,7 @@ Parameters:
   Glacier:
     Description: If enabled, source assets will be tagged for archiving to Glacier once the workflow is complete
     Type: String
-    Default: No
+    Default: Yes
     AllowedValues:
       - Yes
       - No
@@ -25,7 +25,7 @@ Parameters:
   FrameCapture:
     Description: If enabled, frame capture is added to the job submitted to MediaConvert
     Type: String
-    Default: No
+    Default: Yes
     AllowedValues:
       - Yes
       - No
@@ -37,6 +37,39 @@ Parameters:
     AllowedValues:
       - Yes
       - No
+
+  EnablePortraitProfile:
+    Description: If enabled, profile will determine based on portrait source videos
+    Type: String
+    Default: Yes
+    AllowedValues:
+      - Yes
+      - No
+
+  Environment:
+    Description: Used to tag resources with env value
+    Type: String
+  
+  CloudFrontAlias:
+    Description: The cname to use for the cdn distribution
+    Type: String
+
+  SNSNewVideoCallbackURL:
+    Description: The webhook for a new source video has been added to the source bucket
+    Type: String
+
+  SNSWorkflowCallbackURL:
+    Description: The webhook for a state change in the pipeline
+    Type: String
+
+  CloudFrontCertARN:
+    Description: The ARN of the certificate used for any cname aliases on cloudfront
+    Type: String
+
+  DynamoDBBillingMode:
+    Description: Specify how you are charged for read and write throughput and how you manage capacity.
+    Type: String
+    Default: PROVISIONED
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -131,6 +164,8 @@ Resources:
                 Action:
                   - mediaconvert:CreatePreset
                   - mediaconvert:CreateJobTemplate
+                  - mediaconvert:UpdatePreset
+                  - mediaconvert:UpdateJobTemplate
                   - mediaconvert:DeletePreset
                   - mediaconvert:DeleteJobTemplate
                   - mediaconvert:DescribeEndpoints
@@ -165,6 +200,9 @@ Resources:
   StepFunctionsServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -195,6 +233,9 @@ Resources:
   MediaConvertRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -342,7 +383,7 @@ Resources:
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      BillingMode: PAY_PER_REQUEST
+      BillingMode: !Ref DynamoDBBillingMode
       AttributeDefinitions:
       - AttributeName: guid
         AttributeType: S
@@ -350,9 +391,14 @@ Resources:
         AttributeType: S
       - AttributeName: startTime
         AttributeType: S
+      - AttributeName: srcVideo
+        AttributeType: S
       KeySchema:
       - AttributeName: guid
         KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
       GlobalSecondaryIndexes:
         -
           IndexName: srcBucket-startTime-index
@@ -363,6 +409,19 @@ Resources:
             KeyType: RANGE
           Projection:
             ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: '5'
+            WriteCapacityUnits: '5'
+        -
+          IndexName: srcVideo-index
+          KeySchema:
+          - AttributeName: srcVideo
+            KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: '5'
+            WriteCapacityUnits: '5'
       TableName: !Ref AWS::StackName
     Metadata:
       cfn_nag:
@@ -370,10 +429,152 @@ Resources:
           - id: W28
             reason: "Table name is set to the stack name"
 
+  
+  ScalingRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+     AssumeRolePolicyDocument: 
+      Version: "2012-10-17"
+      Statement: 
+       - 
+        Effect: Allow
+        Principal: 
+         Service: 
+          - 
+           "application-autoscaling.amazonaws.com"
+        Action: 
+         - 
+          "sts:AssumeRole"
+     Path: "/"
+     Policies: 
+      - 
+       PolicyName: root
+       PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+         - 
+          Effect: Allow
+          Action:          
+           - "dynamodb:DescribeTable"
+           - "dynamodb:UpdateTable"
+           - "cloudwatch:PutMetricAlarm"
+           - "cloudwatch:DescribeAlarms"
+           - "cloudwatch:GetMetricStatistics"
+           - "cloudwatch:SetAlarmState"
+           - "cloudwatch:DeleteAlarms"
+          Resource: "*"
+
+  DynamoTableWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5   
+      ResourceId: !Sub table/${AWS::StackName}
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:table:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  # Table write
+  DynamoTableWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: 
+        Ref: DynamoTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  DynamoTableReadCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5   
+      ResourceId: !Sub table/${AWS::StackName}
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:table:ReadCapacityUnits"
+      ServiceNamespace: dynamodb
+
+  DynamoTableReadScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties: 
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: 
+        Ref: DynamoTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification: 
+        PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+
+  SrcBucketIndexWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5
+      ResourceId: !Sub table/${AWS::StackName}/index/srcBucket-startTime-index
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:index:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  SrcBucketIndexWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: SrcBucketIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification: 
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  SrcVideoIndexWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5
+      ResourceId: !Sub table/${AWS::StackName}/index/srcVideo-index
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:index:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  SrcVideoIndexWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: SrcVideoIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+
   Source:
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+      AccelerateConfiguration:
+        AccelerationStatus: Enabled
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
@@ -408,6 +609,9 @@ Resources:
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
@@ -431,6 +635,9 @@ Resources:
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AccessControl: LogDeliveryWrite
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -449,14 +656,48 @@ Resources:
           - id: W51
             reason: "Bucket is private and does not need a bucket policy"
 
+  SnsUploadVideoTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+      DisplayName: !Sub ${AWS::StackName}-UploadVideoNotifications
+      Subscription:
+        -
+          Endpoint: !Ref SNSNewVideoCallbackURL
+          Protocol: https
+
+  UploadVideoTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: SNS:Publish
+            Resource: "*"
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Join ['', ['arn:aws:s3:*:*:', Ref: Source]]
+      Topics:
+        - !Ref SnsUploadVideoTopic
+
   SnsTopic:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: !Sub ${AWS::StackName}-Notifications
       Subscription:
+        # -
+        #   Endpoint: !Ref AdminEmail
+        #   Protocol: email
         -
-          Endpoint: !Ref AdminEmail
-          Protocol: email
+          Endpoint: !Ref SNSWorkflowCallbackURL
+          Protocol: https
 
   DestinationOriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -467,7 +708,13 @@ Resources:
   CloudFront:
     Type: AWS::CloudFront::Distribution
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       DistributionConfig:
+        IPV6Enabled: true
+        Aliases:
+          - !Ref CloudFrontAlias
         Origins:
           - DomainName: !Sub "${Destination}.s3.${AWS::Region}.amazonaws.com"
             Id: vodS3Origin
@@ -495,7 +742,8 @@ Resources:
           ViewerProtocolPolicy: allow-all
         PriceClass: PriceClass_100
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref CloudFrontCertARN
+          SslSupportMethod: sni-only
 
   S3Config:
     DependsOn: CloudFront
@@ -506,6 +754,7 @@ Resources:
       IngestArn: !GetAtt StepFunctions.Arn
       Resource: S3Notification
       WorkflowTrigger: !Ref WorkflowTrigger
+      TopicArn: !Ref SnsUploadVideoTopic
 
   MediaConvertEndPoint:
     Type: Custom::LoadLambda
@@ -516,11 +765,15 @@ Resources:
   MediaConvertTemplates:
     Type: Custom::LoadLambda
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       ServiceToken: !GetAtt CustomResource.Arn
       Resource: "MediaConvertTemplates"
       StackName: !Sub ${AWS::StackName}
       EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
       EnableMediaPackage: !Ref EnableMediaPackage
+      Forceupdate: true
 
   MediaPackageVod:
     Type: Custom::LoadLambda
@@ -534,6 +787,11 @@ Resources:
   CustomResource:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+        - Key: Role
+          Value: vod
       FunctionName: !Sub ${AWS::StackName}-custom-resource
       Description: Used to deploy resources not supported by CloudFormation
       Handler: index.handler
@@ -547,6 +805,9 @@ Resources:
   StepFunctionsRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -593,6 +854,9 @@ Resources:
   StepFunctions:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub "${AWS::StackName}-step-functions"
       Description: Creates a unique identifer (GUID) and executes the Ingest StateMachine
       Handler: index.handler
@@ -612,6 +876,9 @@ Resources:
   InputValidateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -656,6 +923,9 @@ Resources:
   InputValidate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-input-validate
       Description: Validates the input given to the workflow
       Handler: index.handler
@@ -682,19 +952,38 @@ Resources:
             !If
               - IsMediaPackageEnabled
               - !Sub "${AWS::StackName}_Ott_1080p_Avc_Aac_16x9_mvod"
-              - !Sub "${AWS::StackName}_Ott_1080p_Avc_Aac_16x9_qvbr"
+              - !Sub "${AWS::StackName}_1080p"
           MediaConvert_Template_720p:
             !If
               - IsMediaPackageEnabled
               - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
-              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_qvbr"
+              - !Sub "${AWS::StackName}_720p"
+          MediaConvert_Template_540p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_540p"
+          MediaConvert_Template_360p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_360p"
+          MediaConvert_Template_234p:
+            !If
+              - IsMediaPackageEnabled
+              - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
+              - !Sub "${AWS::StackName}_234p"
           CloudFront: !GetAtt CloudFront.DomainName
           EnableMediaPackage: !Ref EnableMediaPackage
           InputRotate: DEGREE_0
 
+
   MediainfoRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -739,6 +1028,9 @@ Resources:
   Mediainfo:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-mediainfo
       Description: Runs mediainfo on a pre-signed S3 URL
       Handler: lambda_function.lambda_handler
@@ -755,6 +1047,9 @@ Resources:
   DynamoUpdateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -799,6 +1094,9 @@ Resources:
   DynamodbUpdate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-dynamo
       Description: Updates DynamoDB with event data
       Handler: index.handler
@@ -816,6 +1114,9 @@ Resources:
   ProfilerRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -860,6 +1161,9 @@ Resources:
   Profiler:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-profiler
       Description: Sets an EncodeProfile based on mediainfo output
       Handler: index.handler
@@ -873,10 +1177,15 @@ Resources:
         Variables:
           DynamoDBTable: !Ref DynamoDBTable
           ErrorHandler: !GetAtt ErrorHandler.Arn
+          EnablePortraitProfile: !Ref EnablePortraitProfile
+
 
   EncodeRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -928,6 +1237,9 @@ Resources:
   Encode:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-encode
       Description: Creates a MediaConvert encode job
       Handler: index.handler
@@ -946,6 +1258,9 @@ Resources:
   OutputValidateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -990,6 +1305,9 @@ Resources:
   OutputValidate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-output-validate
       Description: Parses MediaConvert job output
       Handler: index.handler
@@ -1008,6 +1326,9 @@ Resources:
   ArchiveSourceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1052,6 +1373,9 @@ Resources:
   ArchiveSource:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-archive-source
       Description: Updates tags on source files to enable Glacier
       Handler: index.handler
@@ -1068,6 +1392,9 @@ Resources:
   SnsNotificationRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1112,6 +1439,9 @@ Resources:
   SnsNotification:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-sns-notification
       Description: Sends a notification when the encode job is completed
       Handler: index.handler
@@ -1129,6 +1459,9 @@ Resources:
   MediaPackageAssetsRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1185,6 +1518,9 @@ Resources:
   MediaPackageAssets:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-media-package-assets
       Description: Ingests an asset into MediaPackage-VOD
       Handler: index.handler
@@ -1204,6 +1540,9 @@ Resources:
   ErrorHandlerRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1248,6 +1587,9 @@ Resources:
   ErrorHandler:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub "${AWS::StackName}-error-handler"
       Description: Captures and processes workflow errors
       Handler: index.handler
@@ -1265,6 +1607,9 @@ Resources:
   IngestWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-ingest
       DefinitionString: !Sub |
         {
@@ -1302,6 +1647,9 @@ Resources:
   ProcessWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-process
       DefinitionString: !Sub |
         {
@@ -1330,6 +1678,9 @@ Resources:
   PublishWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-publish
       DefinitionString: !Sub |
         {
