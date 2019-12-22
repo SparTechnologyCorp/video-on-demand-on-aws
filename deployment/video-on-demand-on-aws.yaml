@@ -195,6 +195,9 @@ Resources:
   StepFunctionsServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -225,6 +228,9 @@ Resources:
   MediaConvertRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -410,9 +416,14 @@ Resources:
             reason: "Table name is set to the stack name"
 
   Source:
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+      AccelerateConfiguration:
+        AccelerationStatus: Enabled
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
@@ -444,9 +455,12 @@ Resources:
             reason: "Bucket is private and does not need a bucket policy"
 
   Destination:
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
@@ -467,9 +481,12 @@ Resources:
               SSEAlgorithm: AES256
 
   Logs:
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AccessControl: LogDeliveryWrite
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -631,6 +648,9 @@ Resources:
   StepFunctionsRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
