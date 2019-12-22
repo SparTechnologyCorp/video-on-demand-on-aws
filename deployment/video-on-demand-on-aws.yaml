@@ -55,16 +55,21 @@ Parameters:
     Type: String
 
   SNSNewVideoCallbackURL:
-    Description: The webhook for sns events
+    Description: The webhook for a new source video has been added to the source bucket
     Type: String
 
   SNSWorkflowCallbackURL:
-    Description: The webhook for sns events
+    Description: The webhook for a state change in the pipeline
     Type: String
 
   CloudFrontCertARN:
     Description: The ARN of the certificate used for any cname aliases on cloudfront
     Type: String
+
+  DynamoDBBillingMode:
+    Description: Specify how you are charged for read and write throughput and how you manage capacity.
+    Type: String
+    Default: PROVISIONED
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -378,7 +383,7 @@ Resources:
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      BillingMode: PAY_PER_REQUEST
+      BillingMode: !Ref DynamoDBBillingMode
       AttributeDefinitions:
       - AttributeName: guid
         AttributeType: S
@@ -391,6 +396,9 @@ Resources:
       KeySchema:
       - AttributeName: guid
         KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
       GlobalSecondaryIndexes:
         -
           IndexName: srcBucket-startTime-index
@@ -401,6 +409,9 @@ Resources:
             KeyType: RANGE
           Projection:
             ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: '5'
+            WriteCapacityUnits: '5'
         -
           IndexName: srcVideo-index
           KeySchema:
@@ -408,12 +419,152 @@ Resources:
             KeyType: HASH
           Projection:
             ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: '5'
+            WriteCapacityUnits: '5'
       TableName: !Ref AWS::StackName
     Metadata:
       cfn_nag:
         rules_to_suppress:
           - id: W28
             reason: "Table name is set to the stack name"
+
+  
+  ScalingRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+     AssumeRolePolicyDocument: 
+      Version: "2012-10-17"
+      Statement: 
+       - 
+        Effect: Allow
+        Principal: 
+         Service: 
+          - 
+           "application-autoscaling.amazonaws.com"
+        Action: 
+         - 
+          "sts:AssumeRole"
+     Path: "/"
+     Policies: 
+      - 
+       PolicyName: root
+       PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+         - 
+          Effect: Allow
+          Action:          
+           - "dynamodb:DescribeTable"
+           - "dynamodb:UpdateTable"
+           - "cloudwatch:PutMetricAlarm"
+           - "cloudwatch:DescribeAlarms"
+           - "cloudwatch:GetMetricStatistics"
+           - "cloudwatch:SetAlarmState"
+           - "cloudwatch:DeleteAlarms"
+          Resource: "*"
+
+  DynamoTableWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5   
+      ResourceId: !Sub table/${AWS::StackName}
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:table:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  # Table write
+  DynamoTableWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: 
+        Ref: DynamoTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  DynamoTableReadCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5   
+      ResourceId: !Sub table/${AWS::StackName}
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:table:ReadCapacityUnits"
+      ServiceNamespace: dynamodb
+
+  DynamoTableReadScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties: 
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: 
+        Ref: DynamoTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification: 
+        PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+
+  SrcBucketIndexWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5
+      ResourceId: !Sub table/${AWS::StackName}/index/srcBucket-startTime-index
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:index:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  SrcBucketIndexWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: SrcBucketIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification: 
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  SrcVideoIndexWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 100
+      MinCapacity: 5
+      ResourceId: !Sub table/${AWS::StackName}/index/srcVideo-index
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: "dynamodb:index:WriteCapacityUnits"
+      ServiceNamespace: dynamodb
+
+
+  SrcVideoIndexWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: SrcVideoIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
 
   Source:
     DeletionPolicy: Retain
@@ -520,9 +671,6 @@ Resources:
   UploadVideoTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
-      Tags:
-        - Key: env
-          Value: !Ref Environment
       PolicyDocument:
         Id: MyTopicPolicy
         Version: '2012-10-17'
