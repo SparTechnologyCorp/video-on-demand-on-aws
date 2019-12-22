@@ -541,9 +541,12 @@ Resources:
     Properties:
       DisplayName: !Sub ${AWS::StackName}-Notifications
       Subscription:
+        # -
+        #   Endpoint: !Ref AdminEmail
+        #   Protocol: email
         -
-          Endpoint: !Ref AdminEmail
-          Protocol: email
+          Endpoint: !Ref SNSWorkflowCallbackURL
+          Protocol: https
 
   DestinationOriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
