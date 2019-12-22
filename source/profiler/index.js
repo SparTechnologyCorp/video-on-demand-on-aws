@@ -47,13 +47,15 @@ exports.handler = async (event) => {
 
         // Check if portrait mode
         if (process.env.EnablePortraitProfile) {
-            let profile = Math.abs(event.srcWidth - p);
-      
-          if (profile > lastProfile) {
-            return true;
-          }
-          encodeProfile = p;
-          lastProfile = profile;
+            profiles.some(p => {
+                let profile = Math.abs(event.srcWidth - p);
+                if (profile > lastProfile) {
+                    return true;
+                }
+
+                encodeProfile = p;
+                lastProfile = profile;
+            });
         } else {
             profiles.some(p => {
                 let profile = Math.abs(event.srcHeight - p);

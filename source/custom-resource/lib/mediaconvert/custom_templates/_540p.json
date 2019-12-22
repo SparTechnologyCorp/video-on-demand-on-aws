@@ -26,7 +26,7 @@
           "Type": "CMAF_GROUP_SETTINGS",
           "CmafGroupSettings": {
             "WriteHlsManifest": "ENABLED",
-            "WriteDashManifest": "DISABLED",
+            "WriteDashManifest": "ENABLED",
             "SegmentLength": 6,
             "MinFinalSegmentLength": 0,
             "FragmentLength": 2,

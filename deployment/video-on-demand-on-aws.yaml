@@ -520,6 +520,9 @@ Resources:
   UploadVideoTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       PolicyDocument:
         Id: MyTopicPolicy
         Version: '2012-10-17'
@@ -557,6 +560,9 @@ Resources:
   CloudFront:
     Type: AWS::CloudFront::Distribution
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       DistributionConfig:
         IPV6Enabled: true
         Aliases:
@@ -700,6 +706,9 @@ Resources:
   StepFunctions:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub "${AWS::StackName}-step-functions"
       Description: Creates a unique identifer (GUID) and executes the Ingest StateMachine
       Handler: index.handler
@@ -719,6 +728,9 @@ Resources:
   InputValidateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -763,6 +775,9 @@ Resources:
   InputValidate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-input-validate
       Description: Validates the input given to the workflow
       Handler: index.handler
@@ -865,6 +880,9 @@ Resources:
   Mediainfo:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-mediainfo
       Description: Runs mediainfo on a pre-signed S3 URL
       Handler: lambda_function.lambda_handler
@@ -881,6 +899,9 @@ Resources:
   DynamoUpdateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -945,6 +966,9 @@ Resources:
   ProfilerRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -989,6 +1013,9 @@ Resources:
   Profiler:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-profiler
       Description: Sets an EncodeProfile based on mediainfo output
       Handler: index.handler
@@ -1008,6 +1035,9 @@ Resources:
   EncodeRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1059,6 +1089,9 @@ Resources:
   Encode:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-encode
       Description: Creates a MediaConvert encode job
       Handler: index.handler
@@ -1077,6 +1110,9 @@ Resources:
   OutputValidateRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1121,6 +1157,9 @@ Resources:
   OutputValidate:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-output-validate
       Description: Parses MediaConvert job output
       Handler: index.handler
@@ -1139,6 +1178,9 @@ Resources:
   ArchiveSourceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1183,6 +1225,9 @@ Resources:
   ArchiveSource:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-archive-source
       Description: Updates tags on source files to enable Glacier
       Handler: index.handler
@@ -1199,6 +1244,9 @@ Resources:
   SnsNotificationRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1243,6 +1291,9 @@ Resources:
   SnsNotification:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-sns-notification
       Description: Sends a notification when the encode job is completed
       Handler: index.handler
@@ -1260,6 +1311,9 @@ Resources:
   MediaPackageAssetsRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1316,6 +1370,9 @@ Resources:
   MediaPackageAssets:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub ${AWS::StackName}-media-package-assets
       Description: Ingests an asset into MediaPackage-VOD
       Handler: index.handler
@@ -1335,6 +1392,9 @@ Resources:
   ErrorHandlerRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -1379,6 +1439,9 @@ Resources:
   ErrorHandler:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       FunctionName: !Sub "${AWS::StackName}-error-handler"
       Description: Captures and processes workflow errors
       Handler: index.handler
@@ -1396,6 +1459,9 @@ Resources:
   IngestWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-ingest
       DefinitionString: !Sub |
         {
@@ -1433,6 +1499,9 @@ Resources:
   ProcessWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-process
       DefinitionString: !Sub |
         {
@@ -1461,6 +1530,9 @@ Resources:
   PublishWorkflow:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
       StateMachineName: !Sub ${AWS::StackName}-publish
       DefinitionString: !Sub |
         {
