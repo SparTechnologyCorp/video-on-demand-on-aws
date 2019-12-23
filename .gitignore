@@ -30,3 +30,7 @@
 # System Files
 **/.DS_Store
 **/.vscode
+
+# Deploy scripts
+**/deploy-production.sh
+**/deploy-development.sh
