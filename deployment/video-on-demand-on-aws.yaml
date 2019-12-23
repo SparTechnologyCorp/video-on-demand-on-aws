@@ -480,7 +480,7 @@ Resources:
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         PredefinedMetricSpecification:
-        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
 
   DynamoTableReadCapacityScalableTarget:
     Type: "AWS::ApplicationAutoScaling::ScalableTarget"
@@ -504,7 +504,7 @@ Resources:
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         PredefinedMetricSpecification: 
-        PredefinedMetricType: DynamoDBReadCapacityUtilization
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
 
 
   SrcBucketIndexWriteCapacityScalableTarget:
@@ -530,7 +530,7 @@ Resources:
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         PredefinedMetricSpecification: 
-        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
 
   SrcVideoIndexWriteCapacityScalableTarget:
     Type: "AWS::ApplicationAutoScaling::ScalableTarget"
@@ -555,7 +555,7 @@ Resources:
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         PredefinedMetricSpecification:
-        PredefinedMetricType: DynamoDBWriteCapacityUtilization
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
 
 
   Source:
