@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Add support for `Environment`, `CloudFrontAlias`, `SNSNewVideoCallbackURL`, `SNSWorkflowCallbackURL`, `CloudFrontCertARN`, and `DynamoDBBillingMode`
+- Added a global secondary index on srcVideo which acts as a FK for a traditional backend service
+- Added autoscaling for the dynamodb table and indexes
+- Added `EnablePortraitProfile` in order to select the encoding profiles for vertical videos
+- Added `deploy-production.sh` and `deploy-production.sh` to `.gitignore`
+
+### Removed
+- Remove support for `AdminEmail`, in replace for an https webhook `SNSWorkflowCallbackURL`
+
 ## [5.0.0] - 2019-11-20
 ### Added
 - MediaPackage VOD support

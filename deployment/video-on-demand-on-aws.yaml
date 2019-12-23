@@ -1,11 +1,6 @@
 Description: '(SO0021) - Video On Demand workflow with AWS Step Functions, MediaConvert, MediaPackage, S3, CloudFront and DynamoDB. Version %%VERSION%%'
 
 Parameters:
-  AdminEmail:
-    Description: Email address for SNS notifications (subscribed users will receive ingest, publishing, and error notifications)
-    Type: String
-    AllowedPattern: "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
-
   WorkflowTrigger:
     Description: How the workflow will be triggered (source video upload to S3 or source metadata file upload)
     Type: String
@@ -78,7 +73,6 @@ Metadata:
         Label:
           default: "Workflow"
         Parameters:
-          - AdminEmail
           - WorkflowTrigger
           - Glacier
       -
@@ -92,8 +86,6 @@ Metadata:
         Parameters:
           - EnableMediaPackage
     ParameterLabels:
-      AdminEmail:
-        default: Notification email address
       Glacier:
         default: Archive source content
       WorkflowTrigger:
@@ -692,9 +684,6 @@ Resources:
     Properties:
       DisplayName: !Sub ${AWS::StackName}-Notifications
       Subscription:
-        # -
-        #   Endpoint: !Ref AdminEmail
-        #   Protocol: email
         -
           Endpoint: !Ref SNSWorkflowCallbackURL
           Protocol: https
