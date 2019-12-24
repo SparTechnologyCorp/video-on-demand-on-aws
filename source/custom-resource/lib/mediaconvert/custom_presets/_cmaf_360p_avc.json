@@ -1,62 +1,62 @@
 {
-    "VideoDescription": {
-      "Width": 360,
-      "ScalingBehavior": "DEFAULT",
-      "Height": 640,
-      "TimecodeInsertion": "DISABLED",
-      "AntiAlias": "ENABLED",
-      "Sharpness": 50,
-      "CodecSettings": {
-        "Codec": "H_264",
-        "H264Settings": {
-          "InterlaceMode": "PROGRESSIVE",
-          "ParNumerator": 1,
-          "Syntax": "DEFAULT",
-          "Softness": 0,
-          "FramerateDenominator": 1001,
-          "GopClosedCadence": 1,
-          "GopSize": 60,
-          "Slices": 1,
-          "GopBReference": "ENABLED",
-          "MaxBitrate": 600000,
-          "SlowPal": "DISABLED",
-          "ParDenominator": 1,
-          "SpatialAdaptiveQuantization": "ENABLED",
-          "TemporalAdaptiveQuantization": "ENABLED",
-          "FlickerAdaptiveQuantization": "DISABLED",
-          "EntropyEncoding": "CABAC",
-          "FramerateControl": "SPECIFIED",
-          "NumberReferenceFrames": 3,
-          "RateControlMode": "QVBR",
-          "QvbrSettings": {
-            "QvbrQualityLevel": 7
-          },
-          "CodecProfile": "HIGH",
-          "Telecine": "NONE",
-          "FramerateNumerator": 30000,
-          "HrdBufferSize": 1200000,
-          "HrdBufferInitialFillPercentage": 90,
-          "MinIInterval": 0,
-          "AdaptiveQuantization": "HIGH",
-          "CodecLevel": "LEVEL_4_2",
-          "NumberBFramesBetweenReferenceFrames": 3,
-          "FieldEncoding": "PAFF",
-          "SceneChangeDetect": "ENABLED",
-          "QualityTuningLevel": "SINGLE_PASS_HQ",
-          "FramerateConversionAlgorithm": "DUPLICATE_DROP",
-          "UnregisteredSeiTimecode": "DISABLED",
-          "GopSizeUnits": "FRAMES",
-          "ParControl": "SPECIFIED",
-          "RepeatPps": "DISABLED",
-          "DynamicSubGop": "STATIC"
-        }
-      },
-      "AfdSignaling": "NONE",
-      "DropFrameTimecode": "ENABLED",
-      "RespondToAfd": "NONE",
-      "ColorMetadata": "INSERT"
+  "VideoDescription": {
+    "Width": 360,
+    "ScalingBehavior": "DEFAULT",
+    "Height": 640,
+    "TimecodeInsertion": "DISABLED",
+    "AntiAlias": "ENABLED",
+    "Sharpness": 50,
+    "CodecSettings": {
+      "Codec": "H_264",
+      "H264Settings": {
+        "InterlaceMode": "PROGRESSIVE",
+        "ParNumerator": 1,
+        "NumberReferenceFrames": 3,
+        "Syntax": "DEFAULT",
+        "Softness": 0,
+        "FramerateDenominator": 1001,
+        "GopClosedCadence": 1,
+        "HrdBufferInitialFillPercentage": 90,
+        "GopSize": 60,
+        "Slices": 1,
+        "GopBReference": "ENABLED",
+        "HrdBufferSize": 1200000,
+        "MaxBitrate": 600000,
+        "SlowPal": "DISABLED",
+        "ParDenominator": 1,
+        "SpatialAdaptiveQuantization": "ENABLED",
+        "TemporalAdaptiveQuantization": "ENABLED",
+        "FlickerAdaptiveQuantization": "DISABLED",
+        "EntropyEncoding": "CABAC",
+        "FramerateControl": "SPECIFIED",
+        "RateControlMode": "QVBR",
+        "QvbrSettings": {
+          "QvbrQualityLevel": 7
+        },
+        "CodecProfile": "HIGH",
+        "Telecine": "NONE",
+        "FramerateNumerator": 30000,
+        "MinIInterval": 0,
+        "AdaptiveQuantization": "HIGH",
+        "CodecLevel": "LEVEL_4_2",
+        "FieldEncoding": "PAFF",
+        "SceneChangeDetect": "ENABLED",
+        "QualityTuningLevel": "SINGLE_PASS_HQ",
+        "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+        "UnregisteredSeiTimecode": "DISABLED",
+        "GopSizeUnits": "FRAMES",
+        "ParControl": "SPECIFIED",
+        "NumberBFramesBetweenReferenceFrames": 3,
+        "RepeatPps": "DISABLED",
+        "DynamicSubGop": "STATIC"
+      }
     },
-    "ContainerSettings": {
-      "Container": "CMFC"
-    }
+    "AfdSignaling": "NONE",
+    "DropFrameTimecode": "ENABLED",
+    "RespondToAfd": "NONE",
+    "ColorMetadata": "INSERT"
+  },
+  "ContainerSettings": {
+    "Container": "CMFC"
+  }
 }

@@ -11,13 +11,16 @@
         "H264Settings": {
           "InterlaceMode": "PROGRESSIVE",
           "ParNumerator": 1,
+          "NumberReferenceFrames": 3,
           "Syntax": "DEFAULT",
           "Softness": 0,
           "FramerateDenominator": 1001,
           "GopClosedCadence": 1,
+          "HrdBufferInitialFillPercentage": 90,
           "GopSize": 60,
           "Slices": 1,
-          "GopBReference": "DISABLED",
+          "GopBReference": "ENABLED",
+          "HrdBufferSize": 7000000,
           "MaxBitrate": 3500000,
           "SlowPal": "DISABLED",
           "ParDenominator": 1,
@@ -26,10 +29,6 @@
           "FlickerAdaptiveQuantization": "DISABLED",
           "EntropyEncoding": "CABAC",
           "FramerateControl": "SPECIFIED",
-          "NumberReferenceFrames": 3,
-          "NumberBFramesBetweenReferenceFrames": 3,
-          "HrdBufferSize": 7000000,
-          "HrdBufferInitialFillPercentage": 90,
           "RateControlMode": "QVBR",
           "QvbrSettings": {
             "QvbrQualityLevel": 7
@@ -47,6 +46,7 @@
           "UnregisteredSeiTimecode": "DISABLED",
           "GopSizeUnits": "FRAMES",
           "ParControl": "SPECIFIED",
+          "NumberBFramesBetweenReferenceFrames": 3,
           "RepeatPps": "DISABLED",
           "DynamicSubGop": "STATIC"
         }
