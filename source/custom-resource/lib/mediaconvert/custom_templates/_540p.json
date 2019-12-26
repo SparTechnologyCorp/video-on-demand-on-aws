@@ -5,10 +5,10 @@
       {
         "Name": "CMAF",
         "Outputs": [
-          // {
-          //   "Preset": "_cmaf_234p_avc",
-          //   "NameModifier": "_234p_avc"
-          // },
+          {
+            "Preset": "_cmaf_234p_avc",
+            "NameModifier": "_234p_avc"
+          },
           {
             "Preset": "_cmaf_360p_avc",
             "NameModifier": "_360p_avc"
