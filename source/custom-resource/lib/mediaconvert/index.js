@@ -130,6 +130,18 @@ const mediaPackageTemplates = [
 
 const customPresets = [
   {
+    name: '_mp4_540p_avc',
+    file: './lib/mediaconvert/custom_presets/_mp4_540p_avc.json'
+  },
+  {
+    name: '_mp4_720p_avc',
+    file: './lib/mediaconvert/custom_presets/_mp4_720p_avc.json'
+  },
+  {
+    name: '_mp4_1080p_avc',
+    file: './lib/mediaconvert/custom_presets/_mp4_1080p_avc.json'
+  },
+  {
     name: '_cmaf_64kbits_aacv2',
     file: './lib/mediaconvert/custom_presets/_cmaf_64kbits_aacv2.json'
   },
@@ -213,6 +225,22 @@ const _createPresets = async (instance, presets, stackName) => {
     }
 };
 
+const _updatePresets = async (instance, presets, stackName) => {
+    for (let preset of presets) {
+        // Add stack name to the preset name to ensure it is unique
+        let name = stackName + preset.name;
+        let params = {
+            Name: name,
+            Category: CATEGORY,
+            Description: DESCRIPTION,
+            Settings: JSON.parse(fs.readFileSync(preset.file, 'utf8'))
+        };
+
+        await instance.updatePreset(params).promise();
+        console.log(`preset created:: ${name}`);
+    }
+};
+
 const _createTemplates = async (instance, templates, stackName) => {
     for (let tmpl of templates) {
         // Load template and set unique template name
@@ -230,6 +258,26 @@ const _createTemplates = async (instance, templates, stackName) => {
 
         await instance.createJobTemplate(params).promise();
         console.log(`template created:: ${params.Name}`);
+    }
+};
+
+const _updateTemplates = async (instance, templates, stackName) => {
+    for (let tmpl of templates) {
+        // Load template and set unique template name
+        let params = JSON.parse(fs.readFileSync(tmpl.file, 'utf8'));
+        params.Name = stackName + params.Name;
+
+        // Update preset names unless system presets
+        params.Settings.OutputGroups.forEach(group => {
+            group.Outputs.forEach(output => {
+                if (!output.Preset.startsWith('System')) {
+                    output.Preset = stackName + output.Preset;
+                }
+            });
+        });
+
+        await instance.updateJobTemplate(params).promise();
+        console.log(`template updated:: ${params.Name}`);
     }
 };
 
@@ -253,8 +301,8 @@ const Create = async (config) => {
             templates = customTemplates;
         }
 
-        await _createPresets(mediaconvert, presets, config.StackName);
-        await _createTemplates(mediaconvert, templates, config.StackName);
+        await _updatePresets(mediaconvert, presets, config.StackName);
+        await _updateTemplates(mediaconvert, templates, config.StackName);
     } catch (err) {
         throw err;
     }
@@ -294,6 +342,26 @@ const Update = async (config) => {
             console.log('No changes to the MediaConvert templates');
         }
     } catch (err) {
+        throw err;
+    }
+
+    return 'success';
+};
+
+const UpdateBoth = async (config) => {
+    const mediaconvert = new AWS.MediaConvert({
+        endpoint: config.EndPoint,
+        region: process.env.AWS_REGION
+    });
+
+    try {
+        console.log('Recreating templates');
+        // await _deletePresets(mediaconvert, customPresets, config.StackName);
+        // await _deleteTemplates(mediaconvert, customTemplate, config.StackName);
+        await _updatePresets(mediaconvert, customPresets, config.StackName);
+        await _updateTemplates(mediaconvert, customTemplate, config.StackName);
+    } catch (err) {
+        console.log(err);
         throw err;
     }
 
@@ -356,5 +424,6 @@ module.exports = {
     getEndpoint: GetEndpoints,
     createTemplates: Create,
     updateTemplates: Update,
+    updatePresetsAndTemplates: UpdateBoth,
     deleteTemplates: Delete
 };

@@ -757,12 +757,27 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
+        - Key: role
+          Value: vod
       ServiceToken: !GetAtt CustomResource.Arn
       Resource: "MediaConvertTemplates"
       StackName: !Sub ${AWS::StackName}
       EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
       EnableMediaPackage: !Ref EnableMediaPackage
-      Forceupdate: true
+
+  MediaConvertPresets:
+    Type: Custom::LoadLambda
+    Properties:
+      Tags:
+        - Key: env
+          Value: !Ref Environment
+        - Key: role
+          Value: vod
+      ServiceToken: !GetAtt CustomResource.Arn
+      Resource: "MediaConvertPresets"
+      StackName: !Sub ${AWS::StackName}
+      EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
+      Recreate: false
 
   MediaPackageVod:
     Type: Custom::LoadLambda
@@ -790,6 +805,10 @@ Resources:
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "custom-resource.zip"]]
       Runtime: nodejs10.x
       Timeout: 180
+      Environment:
+        Variables:
+          VersionNumber: v5.0.24
+
 
   StepFunctionsRole:
     Type: AWS::IAM::Role
@@ -926,6 +945,7 @@ Resources:
       Timeout: 120
       Environment:
         Variables:
+          DeployVersion: v5.0.9
           ErrorHandler: !GetAtt ErrorHandler.Arn
           WorkflowName: !Sub ${AWS::StackName}
           Source: !Ref Source
@@ -962,7 +982,7 @@ Resources:
               - IsMediaPackageEnabled
               - !Sub "${AWS::StackName}_Ott_720p_Avc_Aac_16x9_mvod"
               - !Sub "${AWS::StackName}_234p"
-          CloudFront: !GetAtt CloudFront.DomainName
+          CloudFront: !Ref CloudFrontAlias
           EnableMediaPackage: !Ref EnableMediaPackage
           InputRotate: DEGREE_0
 

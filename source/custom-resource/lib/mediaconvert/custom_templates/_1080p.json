@@ -3,6 +3,20 @@
   "Settings": {
     "OutputGroups": [
       {
+          "Name": "File Group",
+          "OutputGroupSettings": {
+              "Type": "FILE_GROUP_SETTINGS",
+              "FileGroupSettings": {}
+          },
+          "Outputs": [
+              {
+                  "Preset": "_mp4_1080p_avc",
+                  "Extension": "mp4",
+                  "NameModifier": "_mp4_1080p_avc"
+              }
+          ]
+      },
+      {
         "CustomName": "1080p",
         "Name": "CMAF",
         "Outputs": [
