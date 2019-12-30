@@ -777,7 +777,9 @@ Resources:
       Resource: "MediaConvertPresets"
       StackName: !Sub ${AWS::StackName}
       EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
-      Recreate: false
+      Recreate: true
+      UUID: !GetAtt Uuid.UUID
+      ForceRecreate: v5.0.30
 
   MediaPackageVod:
     Type: Custom::LoadLambda
@@ -807,7 +809,7 @@ Resources:
       Timeout: 180
       Environment:
         Variables:
-          VersionNumber: v5.0.24
+          VersionNumber: v5.0.30
 
 
   StepFunctionsRole:

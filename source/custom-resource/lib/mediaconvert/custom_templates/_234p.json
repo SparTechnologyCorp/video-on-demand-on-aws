@@ -11,7 +11,7 @@
           },
           {
             "Preset": "System-Ott_Cmaf_Cmfc_Aac_He_64Kbps",
-            "NameModifier": "_audioL"
+            "NameModifier": "_Ott_Cmaf_Cmfc_Aac_He_64Kbps"
           }
         ],
         "OutputGroupSettings": {

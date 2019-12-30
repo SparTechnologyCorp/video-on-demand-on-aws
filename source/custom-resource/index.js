@@ -72,10 +72,10 @@ exports.handler = async (event, context) => {
                     await MediaConvert.updateTemplates(config);
                     break;
                 case 'MediaConvertPresets':
-                    if (config.Recreate) {
-                        console.log("recreating templates")
-                        await MediaConvert.updatePresetsAndTemplates(config);
-                    }
+                    //if (config.Recreate) {
+                    console.log("recreating templates")
+                    await MediaConvert.updatePresetsAndTemplates(config);
+                    //}
                     break;
                 default:
                     console.log(config.Resource, ': update not supported, sending success response');

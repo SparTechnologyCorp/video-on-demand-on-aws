@@ -57,8 +57,8 @@ const getCmafGroup = (outputPath) => ({
     OutputGroupSettings: {
         Type: 'CMAF_GROUP_SETTINGS',
         CmafGroupSettings: {
-            SegmentLength: 30,
-            FragmentLength: 3,
+            SegmentLength: 6,
+            FragmentLength: 2,
             Destination: `${outputPath}/cmaf/`
         }
     },
@@ -104,7 +104,7 @@ const getFrameGroup = (event, outputPath) => ({
             AntiAlias: 'ENABLED',
             CodecSettings: {
                 FrameCaptureSettings: {
-                    MaxCaptures: 10000000,
+                    MaxCaptures: 1,
                     Quality: 80,
                     FramerateDenominator: 5,
                     FramerateNumerator: 1

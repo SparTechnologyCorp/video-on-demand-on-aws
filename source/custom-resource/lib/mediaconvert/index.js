@@ -142,10 +142,6 @@ const customPresets = [
     file: './lib/mediaconvert/custom_presets/_mp4_1080p_avc.json'
   },
   {
-    name: '_cmaf_64kbits_aacv2',
-    file: './lib/mediaconvert/custom_presets/_cmaf_64kbits_aacv2.json'
-  },
-  {
     name: '_cmaf_234p_avc',
     file: './lib/mediaconvert/custom_presets/_cmaf_234p_avc.json'
   },
@@ -359,7 +355,7 @@ const UpdateBoth = async (config) => {
         // await _deletePresets(mediaconvert, customPresets, config.StackName);
         // await _deleteTemplates(mediaconvert, customTemplate, config.StackName);
         await _updatePresets(mediaconvert, customPresets, config.StackName);
-        await _updateTemplates(mediaconvert, customTemplate, config.StackName);
+        await _updateTemplates(mediaconvert, customTemplates, config.StackName);
     } catch (err) {
         console.log(err);
         throw err;

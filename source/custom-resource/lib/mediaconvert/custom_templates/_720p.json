@@ -21,10 +21,6 @@
         "Name": "CMAF",
         "Outputs": [
           {
-            "Preset": "_cmaf_234p_avc",
-            "NameModifier": "_234p_avc"
-          },
-          {
             "Preset": "_cmaf_360p_avc",
             "NameModifier": "_360p_avc"
           },
@@ -37,8 +33,12 @@
             "NameModifier": "_720p_avc"
           },
           {
-            "Preset": "_cmaf_64kbits_aacv2",
-            "NameModifier": "_audioL"
+            "Preset": "System-Ott_Cmaf_Cmfc_Aac_He_64Kbps",
+            "NameModifier": "_Ott_Cmaf_Cmfc_Aac_He_64Kbps"
+          },
+          {
+            "Preset": "System-Ott_Cmaf_Cmfc_Aac_He_96Kbps",
+            "NameModifier": "_Ott_Cmaf_Cmfc_Aac_He_96Kbps"
           }
         ],
         "OutputGroupSettings": {
