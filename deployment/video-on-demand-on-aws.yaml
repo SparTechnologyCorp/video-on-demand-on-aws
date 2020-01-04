@@ -570,6 +570,11 @@ Resources:
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
+      AnalyticsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-analytics
+          StorageClassAnalysis: 
+            DataExport: !Ref "AWS::NoValue"
       LifecycleConfiguration:
         Rules:
           -
@@ -581,7 +586,25 @@ Resources:
             Status: Enabled
             Transitions:
             - TransitionInDays: 1
-              StorageClass: Glacier
+              StorageClass: DEEP_ARCHIVE
+          -
+            Id: !Sub ${AWS::StackName}-source-expire
+            TagFilters:
+              -
+                Key: !Sub ${AWS::StackName}
+                Value: archive
+            Status: Enabled
+            ExpirationInDays: 190
+            NoncurrentVersionExpirationInDays: 10
+          -
+            Id: !Sub ${AWS::StackName}-source-delete
+            TagFilters:
+              -
+                Key: lifecycle
+                Value: delete
+            Status: Enabled
+            ExpirationInDays: 10
+            NoncurrentVersionExpirationInDays: 10
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -604,6 +627,11 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
+      AnalyticsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-analytics
+          StorageClassAnalysis: 
+            DataExport: !Ref "AWS::NoValue"
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
