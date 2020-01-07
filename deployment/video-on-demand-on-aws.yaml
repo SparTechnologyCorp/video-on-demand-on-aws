@@ -570,6 +570,9 @@ Resources:
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
+      MetricsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-metrics
       AnalyticsConfigurations:
         -
           Id: !Sub ${AWS::StackName}-analytics
@@ -632,6 +635,9 @@ Resources:
           Id: !Sub ${AWS::StackName}-analytics
           StorageClassAnalysis: 
             DataExport: !Ref "AWS::NoValue"
+      MetricsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-metrics
       LoggingConfiguration:
         DestinationBucketName: !Ref Logs
         LogFilePrefix: s3-access/
@@ -658,6 +664,14 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
+      AnalyticsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-analytics
+          StorageClassAnalysis: 
+            DataExport: !Ref "AWS::NoValue"
+      MetricsConfigurations:
+        -
+          Id: !Sub ${AWS::StackName}-metrics
       AccessControl: LogDeliveryWrite
       BucketEncryption:
         ServerSideEncryptionConfiguration:

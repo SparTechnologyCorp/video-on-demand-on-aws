@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed transition policy to `DEEP_ARCHIVE` for source videos after one day
 
 ### Added
+- Added metrics configuration to all s3 buckets
 - Added expiration of source videos after 180 days (minimum storage duration for deep archive)
 - Add support for `Environment`, `CloudFrontAlias`, `SNSNewVideoCallbackURL`, `SNSWorkflowCallbackURL`, `CloudFrontCertARN`, and `DynamoDBBillingMode`
 - Added a global secondary index on srcVideo which acts as a FK for a traditional backend service
