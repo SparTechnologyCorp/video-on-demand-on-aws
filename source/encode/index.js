@@ -151,9 +151,10 @@ exports.handler = async (event) => {
                             DefaultSelection: 'NOT_DEFAULT',
                             ProgramSelection: 1,
                             SelectorType: 'TRACK',
-                            Tracks: [
-                                1
-                            ]
+                            // Don't fail if video has no audio track. https://stackoverflow.com/a/56077441/775762
+                            // Tracks: [
+                            //     1
+                            // ]
                         }
                     },
                     VideoSelector: {

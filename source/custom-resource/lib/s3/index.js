@@ -103,7 +103,7 @@ let PutNotification = async (config) => {
                                 Key: {
                                     FilterRules: [{
                                         Name: 'suffix',
-                                        Value: 'json'
+                                        Value: '.json'
                                     }]
                                 }
                             }
