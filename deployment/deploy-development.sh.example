@@ -19,6 +19,7 @@ aws cloudformation deploy --s3-bucket staging-vod-us-east-1 \
 --stack-name staging-vod \
 --capabilities CAPABILITY_IAM \
 --profile my-us-east-profile \
+--role-arn role-to-execute-this-template-arn \
 --parameter-overrides WorkflowTrigger=MetadataFile \
   CloudFrontAlias=videos.myapp.com \
   CloudFrontCertARN=arn:aws:acm:us-east-1:my-acm-cert \
