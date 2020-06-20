@@ -847,10 +847,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "custom-resource.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 180
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           VersionNumber: v5.0.30
 
 
@@ -916,10 +917,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "step-functions.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           IngestWorkflow: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-ingest"
           ProcessWorkflow: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-process"
           PublishWorkflow: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-publish"
@@ -985,10 +987,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "input-validate.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DeployVersion: v5.0.9
           ErrorHandler: !GetAtt ErrorHandler.Arn
           WorkflowName: !Sub ${AWS::StackName}
@@ -1157,10 +1160,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "dynamo.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DynamoDBTable: !Ref DynamoDBTable
           ErrorHandler: !GetAtt ErrorHandler.Arn
 
@@ -1224,10 +1228,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "profiler.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DynamoDBTable: !Ref DynamoDBTable
           ErrorHandler: !GetAtt ErrorHandler.Arn
           EnablePortraitProfile: !Ref EnablePortraitProfile
@@ -1300,10 +1305,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "encode.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ErrorHandler: !GetAtt ErrorHandler.Arn
           MediaConvertRole: !GetAtt MediaConvertRole.Arn
           EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
@@ -1368,10 +1374,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "output-validate.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DynamoDBTable: !Ref DynamoDBTable
           ErrorHandler: !GetAtt ErrorHandler.Arn
           EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
@@ -1436,10 +1443,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "archive-source.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ErrorHandler: !GetAtt ErrorHandler.Arn
 
   SnsNotificationRole:
@@ -1502,10 +1510,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "sns-notification.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ErrorHandler: !GetAtt ErrorHandler.Arn
           SnsTopic: !Ref SnsTopic
 
@@ -1581,10 +1590,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "media-package-assets.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 300
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DistributionId: !Ref CloudFront
           ErrorHandler: !GetAtt ErrorHandler.Arn
           GroupId: !GetAtt MediaPackageVod.GroupId
@@ -1650,10 +1660,11 @@ Resources:
       Code:
         S3Bucket: !Join ["-", [!FindInMap ["SourceCode", "General", "S3Bucket"], Ref: "AWS::Region"]]
         S3Key: !Join ["/", [!FindInMap ["SourceCode", "General", "KeyPrefix"], "error-handler.zip"]]
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       Timeout: 120
       Environment:
         Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           DynamoDBTable: !Ref DynamoDBTable
           SnsTopic: !Ref SnsTopic
 

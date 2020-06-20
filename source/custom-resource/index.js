@@ -40,17 +40,15 @@ exports.handler = async (event, context) => {
                 case 'MediaConvertTemplates':
                     await MediaConvert.createTemplates(config);
                     break;
-                case ('UUID'):
-                    responseData = {
-                        UUID: uuidv4()
-                    };
+                case 'UUID':
+                    responseData = { UUID: uuidv4() };
                     break;
 
-                case ('AnonymousMetric'):
+                case 'AnonymousMetric':
                     await Metrics.send(config);
                     break;
 
-                case ('MediaPackageVod'):
+                case 'MediaPackageVod':
                     responseData = await MediaPackage.create(config);
                     break;
 
@@ -70,6 +68,9 @@ exports.handler = async (event, context) => {
 
                 case 'MediaConvertTemplates':
                     await MediaConvert.updateTemplates(config);
+                    break;
+                case 'MediaPackageVod':
+                    responseData = await MediaPackage.update(config);
                     break;
                 case 'MediaConvertPresets':
                     //if (config.Recreate) {
@@ -98,7 +99,7 @@ exports.handler = async (event, context) => {
             }
         }
 
-        let response = await cfn.send(event, context, 'SUCCESS', responseData);
+        const response = await cfn.send(event, context, 'SUCCESS', responseData);
         console.log(`RESPONSE:: ${JSON.stringify(responseData, null, 2)}`);
         console.log(`CFN STATUS:: ${response}`);
     } catch (err) {
