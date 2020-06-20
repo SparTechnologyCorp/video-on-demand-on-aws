@@ -334,16 +334,16 @@ const Update = async (config) => {
     });
 
 // <<<<<<< HEAD
-        if (config.EnableMediaPackage != enableMediaPackage) {
-            if (config.EnableMediaPackage == 'true') {
-                console.log('Deleting qvbr templates and creating MediaPackage templates');
-                await _deleteTemplates(mediaconvert, customTemplates, config.StackName);
-                await _createTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
-            } else {
-                console.log('Deleting MediaPackage templates and creating qvbr templates');
-                await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
-                await _createTemplates(mediaconvert, customTemplates, config.StackName);
-            }
+    if (config.EnableMediaPackage != enableMediaPackage) {
+        if (config.EnableMediaPackage == 'true') {
+            console.log('Deleting qvbr templates and creating MediaPackage templates');
+            await _deleteTemplates(mediaconvert, customTemplates, config.StackName);
+            await _createTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
+        } else {
+            console.log('Deleting MediaPackage templates and creating qvbr templates');
+            await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
+            await _createTemplates(mediaconvert, customTemplates, config.StackName);
+        }
 // =======
 //     if (config.EnableMediaPackage != enableMediaPackage) {
 //         if (config.EnableMediaPackage == 'true') {
@@ -351,11 +351,11 @@ const Update = async (config) => {
 //             await _deleteTemplates(mediaconvert, qvbrTemplates, config.StackName);
 //             await _createTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
 // >>>>>>> master
-        } else {
-            console.log('Deleting MediaPackage templates and creating qvbr templates');
-            await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
-            await _createTemplates(mediaconvert, qvbrTemplates, config.StackName);
-        }
+        // } else {
+        //     console.log('Deleting MediaPackage templates and creating qvbr templates');
+        //     await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
+        //     await _createTemplates(mediaconvert, qvbrTemplates, config.StackName);
+        // }
     } else {
         console.log('No changes to the MediaConvert templates');
     }

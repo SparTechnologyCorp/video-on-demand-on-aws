@@ -10,14 +10,14 @@ Parameters:
       - VideoFile
       - MetadataFile
 
-    Glacier:
-      Description: If enabled, source assets will be tagged for archiving to Glacier or Glacier Deep Archive once the workflow is complete
-      Type: String
-      Default: DISABLED
-      AllowedValues:
-        - DISABLED
-        - GLACIER
-        - DEEP_ARCHIVE
+  Glacier:
+    Description: If enabled, source assets will be tagged for archiving to Glacier or Glacier Deep Archive once the workflow is complete
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - DISABLED
+      - GLACIER
+      - DEEP_ARCHIVE
 
 
   FrameCapture:
