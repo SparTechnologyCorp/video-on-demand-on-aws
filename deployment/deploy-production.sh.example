@@ -29,7 +29,8 @@ aws cloudformation deploy --s3-bucket prod-vod-us-east-1 \
   EnablePortraitProfile=true \
   EnableMediaPackage=false \
   FrameCapture=true \
-  Glacier=true
+  Glacier=DEEP_ARCHIVE \
+  AcceleratedTranscoding=DISABLED
 
 cd ..
 echo "$1" > production_version 
