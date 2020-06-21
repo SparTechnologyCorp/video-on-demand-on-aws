@@ -728,6 +728,7 @@ Resources:
         - Key: env
           Value: !Ref Environment
       DisplayName: !Sub ${AWS::StackName}-UploadVideoNotifications
+      KmsMasterKeyId: alias/aws/sns
       Subscription:
         -
           Endpoint: !Ref SNSNewVideoCallbackURL
