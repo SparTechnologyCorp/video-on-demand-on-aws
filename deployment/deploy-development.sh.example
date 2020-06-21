@@ -30,7 +30,9 @@ aws cloudformation deploy --no-execute-changeset --s3-bucket staging-vod-us-east
   EnableMediaPackage=false \
   FrameCapture=true \
   Glacier=DEEP_ARCHIVE \
-  AcceleratedTranscoding=DISABLED
+  AcceleratedTranscoding=DISABLED \
+  EnableSns=true \
+  EnableSqs=false
 
 cd ..
 echo "$1" > development_version 

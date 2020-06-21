@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added autoscaling for the dynamodb table and indexes
 - Added `EnablePortraitProfile` in order to select the encoding profiles for vertical videos
 - Added `deploy-production.sh` and `deploy-production.sh` to `.gitignore`
+- Added MediaConvertQueue resource instead of using default for all deploys
 
 ### Removed
 - Remove support for `AdminEmail`, in replace for an https webhook `SNSWorkflowCallbackURL`

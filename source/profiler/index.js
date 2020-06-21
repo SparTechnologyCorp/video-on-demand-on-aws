@@ -107,8 +107,8 @@ exports.handler = async (event) => {
 
             event.jobTemplate = jobTemplates[encodeProfile];
             console.log(`Chosen template:: ${event.jobTemplate}`);
-
-            event.isCustomTemplate = false;
+            // new
+            event.isCustomTemplate = true;
         } else {
             event.isCustomTemplate = true;
         }

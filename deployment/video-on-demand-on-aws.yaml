@@ -1348,6 +1348,7 @@ Resources:
           ErrorHandler: !GetAtt ErrorHandler.Arn
           MediaConvertRole: !GetAtt MediaConvertRole.Arn
           EndPoint: !GetAtt MediaConvertEndPoint.EndpointUrl
+          MediaConvertQueue: !Ref MediaConvertQueue
 
   OutputValidateRole:
     Type: AWS::IAM::Role
@@ -1544,6 +1545,7 @@ Resources:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ErrorHandler: !GetAtt ErrorHandler.Arn
           SqsQueue: !Ref SqsQueue
+  
   SnsNotificationRole:
     Type: AWS::IAM::Role
     Properties:
@@ -2039,6 +2041,12 @@ Resources:
       FrameCapture: !Ref FrameCapture
       Resource: AnonymousMetric
       EnableMediaPackage: !Ref EnableMediaPackage
+
+  MediaConvertQueue:
+    Type: AWS::MediaConvert::Queue
+    Properties:
+      Name: !Sub "${AWS::StackName}-convert-queue"
+
 
 Outputs:
 
