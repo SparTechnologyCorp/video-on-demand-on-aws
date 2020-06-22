@@ -609,7 +609,7 @@ Resources:
                 Value: GLACIER
             Status: Enabled
             Transitions:
-            - TransitionInDays: 1
+            - TransitionInDays: 5
               StorageClass: GLACIER
           - Id: !Sub "${AWS::StackName}-source-deep-archive"
             TagFilters:
@@ -617,7 +617,7 @@ Resources:
                 Value: DEEP_ARCHIVE
             Status: Enabled
             Transitions:
-            - TransitionInDays: 1
+            - TransitionInDays: 5
               StorageClass: DEEP_ARCHIVE
           -
             Id: !Sub ${AWS::StackName}-source-expire
@@ -637,10 +637,10 @@ Resources:
             Status: Enabled
             ExpirationInDays: 10
             NoncurrentVersionExpirationInDays: 10
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: AES256
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -682,10 +682,10 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: AES256
 
   Logs:
     DeletionPolicy: Retain
@@ -728,7 +728,7 @@ Resources:
         - Key: env
           Value: !Ref Environment
       DisplayName: !Sub ${AWS::StackName}-UploadVideoNotifications
-      KmsMasterKeyId: alias/aws/sns
+      # KmsMasterKeyId: alias/aws/sns
       Subscription:
         -
           Endpoint: !Ref SNSNewVideoCallbackURL
@@ -757,7 +757,7 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: !Sub "${AWS::StackName}-Notifications"
-      KmsMasterKeyId: alias/aws/sns
+      #KmsMasterKeyId: alias/aws/sns
       Subscription:
         -
           Endpoint: !Ref SNSWorkflowCallbackURL
