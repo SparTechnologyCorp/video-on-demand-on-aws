@@ -137,6 +137,7 @@ exports.handler = async (event) => {
 
         // Baseline for the job parameters
         let job = {
+            StatusUpdateInterval: 'SECONDS_10',
             Queue: process.env.MediaConvertQueue,
             JobTemplate: event.jobTemplate,
             Role: process.env.MediaConvertRole,
