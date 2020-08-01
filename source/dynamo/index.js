@@ -15,7 +15,7 @@ const AWS = require('aws-sdk');
 const error = require('./lib/error.js');
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const dynamo = new AWS.DynamoDB.DocumentClient({
         region: process.env.AWS_REGION
@@ -46,7 +46,7 @@ exports.handler = async (event) => {
             ExpressionAttributeValues: values
         };
 
-        console.log(`UPDATE:: ${JSON.stringify(params, null, 2)}`);
+        //console.log(`UPDATE:: ${JSON.stringify(params, null, 2)}`);
         await dynamo.update(params).promise();
 
         // Get updated data and reconst event data to return

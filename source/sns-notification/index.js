@@ -30,7 +30,7 @@ const NOT_APPLICABLE_PROPERTIES = [
 ];
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const sns = new AWS.SNS({
         region: process.env.AWS_REGION
@@ -67,7 +67,7 @@ exports.handler = async (event) => {
             throw new Error('Workflow Status not defined.');
         }
 
-        console.log(`SEND SNS:: ${JSON.stringify(event, null, 2)}`);
+        //console.log(`SEND SNS:: ${JSON.stringify(event, null, 2)}`);
 
         let params = {
             Message: JSON.stringify(msg, null, 2),

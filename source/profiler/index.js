@@ -15,7 +15,7 @@ const AWS = require('aws-sdk');
 const error = require('./lib/error.js');
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const dynamo = new AWS.DynamoDB.DocumentClient({
         region: process.env.AWS_REGION
@@ -106,7 +106,7 @@ exports.handler = async (event) => {
             };
 
             event.jobTemplate = jobTemplates[encodeProfile];
-            console.log(`Chosen template:: ${event.jobTemplate}`);
+            //console.log(`Chosen template:: ${event.jobTemplate}`);
             // new
             event.isCustomTemplate = true;
         } else {
@@ -117,6 +117,6 @@ exports.handler = async (event) => {
         throw err;
     }
 
-    console.log(`RESPONSE:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`RESPONSE:: ${JSON.stringify(event, null, 2)}`);
     return event;
 };

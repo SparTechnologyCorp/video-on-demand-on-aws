@@ -16,7 +16,7 @@ const uuidv4 = require('uuid/v4');
 const error = require('./lib/error.js');
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const stepfunctions = new AWS.StepFunctions({
         region: process.env.AWS_REGION
@@ -73,7 +73,7 @@ exports.handler = async (event) => {
         }
 
         let data = await stepfunctions.startExecution(params).promise();
-        console.log(`STATEMACHINE EXECUTE:: ${JSON.stringify(data, null, 2)}`);
+        //console.log(`STATEMACHINE EXECUTE:: ${JSON.stringify(data, null, 2)}`);
     } catch (err) {
         await error.handler(event, err);
         throw err;

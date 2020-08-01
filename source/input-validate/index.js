@@ -16,7 +16,7 @@ const AWS = require('aws-sdk');
 const error = require('./lib/error');
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const s3 = new AWS.S3();
     let data;
@@ -53,7 +53,7 @@ exports.handler = async (event) => {
 
         switch (event.workflowTrigger) {
             case 'Metadata':
-                console.log('Validating Metadata file::');
+                //console.log('Validating Metadata file::');
 
                 const key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
                 data.srcMetadataFile = key;

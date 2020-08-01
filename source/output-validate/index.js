@@ -18,7 +18,7 @@ const moment = require('moment');
 const buildUrl = (originalValue) => originalValue.slice(5).split('/').splice(1).join('/');
 
 exports.handler = async (event) => {
-  console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+  //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
   const dynamo = new AWS.DynamoDB.DocumentClient({
   region: process.env.AWS_REGION
@@ -46,7 +46,7 @@ exports.handler = async (event) => {
 
   // Parse MediaConvert Output and generate CloudFront URLS.
   event.detail.outputGroupDetails.forEach(output => {
-    console.log(`${output.type} found in outputs`);
+    //console.log(`${output.type} found in outputs`);
 
     switch (output.type) {
     case 'HLS_GROUP':

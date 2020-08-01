@@ -15,7 +15,7 @@ const AWS = require('aws-sdk');
 const error = require('./lib/error.js');
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const s3 = new AWS.S3();
 

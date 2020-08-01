@@ -125,7 +125,7 @@ const applySettingsIfNeeded = (isCustomTemplate, originalGroup, customGroup) => 
 };
 
 exports.handler = async (event) => {
-    console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
+    //console.log(`REQUEST:: ${JSON.stringify(event, null, 2)}`);
 
     const mediaconvert = new AWS.MediaConvert({
         endpoint: process.env.EndPoint
@@ -144,6 +144,11 @@ exports.handler = async (event) => {
             UserMetadata: {
                 guid: event.guid,
                 workflow: event.workflowName
+            },
+            Tags: {
+                'JobTemplate': event.jobTemplate,
+                'Queue': process.env.MediaConvertQueue,
+                'Workflow': event.workflowName
             },
             Settings: {
                 Inputs: [{
@@ -183,7 +188,7 @@ exports.handler = async (event) => {
         const frameCapture = getFrameGroup(event, outputPath);
 
         let tmpl = await mediaconvert.getJobTemplate({ Name: event.jobTemplate }).promise();
-        console.log(`TEMPLATE:: ${JSON.stringify(tmpl, null, 2)}`);
+        //console.log(`TEMPLATE:: ${JSON.stringify(tmpl, null, 2)}`);
 
         // OutputGroupSettings:Type is required and must be one of the following
         // HLS_GROUP_SETTINGS | DASH_ISO_GROUP_SETTINGS | FILE_GROUP_SETTINGS | MS_SMOOTH_GROUP_SETTINGS | CMAF_GROUP_SETTINGS,
@@ -217,7 +222,7 @@ exports.handler = async (event) => {
             }
 
             if (found) {
-                console.log(`${group.Name} found in Job Template`);
+                //console.log(`${group.Name} found in Job Template`);
 
                 const outputGroup = applySettingsIfNeeded(event.isCustomTemplate, defaultGroup, group);
                 job.Settings.OutputGroups.push(outputGroup);
@@ -240,7 +245,7 @@ exports.handler = async (event) => {
         event.encodingJob = job;
         event.encodeJobId = data.Job.Id;
 
-        console.log(`JOB:: ${JSON.stringify(data, null, 2)}`);
+        //console.log(`JOB:: ${JSON.stringify(data, null, 2)}`);
     } catch (err) {
         await error.handler(event, err);
         throw err;
