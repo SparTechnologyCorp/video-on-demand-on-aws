@@ -591,7 +591,7 @@ Resources:
       AccelerateConfiguration:
         AccelerationStatus: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !Ref Logs
+        DestinationBucketName: !Sub "${AWS::Region}-spar-logging"
         LogFilePrefix: s3/
       MetricsConfigurations:
         -
@@ -637,10 +637,6 @@ Resources:
             Status: Enabled
             ExpirationInDays: 10
             NoncurrentVersionExpirationInDays: 10
-      # BucketEncryption:
-      #   ServerSideEncryptionConfiguration:
-      #     - ServerSideEncryptionByDefault:
-      #         SSEAlgorithm: AES256
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -669,7 +665,7 @@ Resources:
         -
           Id: !Sub ${AWS::StackName}-metrics
       LoggingConfiguration:
-        DestinationBucketName: !Ref Logs
+        DestinationBucketName: !Sub "${AWS::Region}-spar-logging"
         LogFilePrefix: s3/
       CorsConfiguration:
         CorsRules:
@@ -682,44 +678,7 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      # BucketEncryption:
-      #   ServerSideEncryptionConfiguration:
-      #     - ServerSideEncryptionByDefault:
-      #         SSEAlgorithm: AES256
 
-  Logs:
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Type: AWS::S3::Bucket
-    Properties:
-      Tags:
-        - Key: env
-          Value: !Ref Environment
-      AnalyticsConfigurations:
-        -
-          Id: !Sub ${AWS::StackName}-analytics
-          StorageClassAnalysis: 
-            DataExport: !Ref "AWS::NoValue"
-      MetricsConfigurations:
-        -
-          Id: !Sub ${AWS::StackName}-metrics
-      AccessControl: LogDeliveryWrite
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W35
-            reason: "Used to store access logs for other buckets"
-          - id: W51
-            reason: "Bucket does not need a bucket policy"
 
   SnsUploadVideoTopic:
     Type: AWS::SNS::Topic
@@ -795,7 +754,9 @@ Resources:
         - Key: env
           Value: !Ref Environment
       DistributionConfig:
+        Comment: !Sub "${AWS::StackName} ${CloudFrontAlias}"
         IPV6Enabled: true
+        HttpVersion: http2
         Aliases:
           - !Ref CloudFrontAlias
         Origins:
@@ -806,35 +767,23 @@ Resources:
         Enabled: true
         Logging:
           IncludeCookies: false
-          Bucket: !GetAtt Logs.DomainName
+          Bucket: !Sub "us-east-1-spar-logging.s3.amazonaws.com"
           Prefix: cloudfront/
         DefaultCacheBehavior:
-          AllowedMethods:
-          - GET
-          - HEAD
-          - OPTIONS
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+          Compress: true
+          DefaultTTL: 0
           TargetOriginId: vodS3Origin
-          ForwardedValues:
-            QueryString: false
-            Cookies:
-              Forward: none
-            Headers:
-              - Origin
-              - Access-Control-Request-Method
-              - Access-Control-Request-Headers
-          ViewerProtocolPolicy: allow-all
+          MaxTTL: 0
+          MinTTL: 0
+          ViewerProtocolPolicy: "redirect-to-https"
         PriceClass: PriceClass_100
         ViewerCertificate:
           AcmCertificateArn: !Ref CloudFrontCertARN
           SslSupportMethod: sni-only
-# =======
-#           CloudFrontDefaultCertificate: true
-#     Metadata:
-#       cfn_nag:
-#         rules_to_suppress:
-#           - id: W70
-#             reason: "CloudFront automatically sets the security policy to TLSv1 when the distribution uses the CloudFront domain name (CloudFrontDefaultCertificate=true)"
-# >>>>>>> master
+          MinimumProtocolVersion: TLSv1.2_2019
+
 
   S3Config:
     DependsOn: CloudFront
