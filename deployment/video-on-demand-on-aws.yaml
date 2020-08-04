@@ -77,6 +77,10 @@ Parameters:
     Description: The cname to use for the cdn distribution
     Type: String
 
+  CloudFrontAlias2:
+    Description: The cname2 to use for the cdn distribution
+    Type: String
+
   SNSNewVideoCallbackURL:
     Description: The webhook for a new source video has been added to the source bucket
     Type: String
@@ -588,6 +592,8 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
+        - Key: role
+          Value: vod
       AccelerateConfiguration:
         AccelerationStatus: Enabled
       LoggingConfiguration:
@@ -595,12 +601,7 @@ Resources:
         LogFilePrefix: s3/
       MetricsConfigurations:
         -
-          Id: !Sub ${AWS::StackName}-metrics
-      AnalyticsConfigurations:
-        -
-          Id: !Sub ${AWS::StackName}-analytics
-          StorageClassAnalysis: 
-            DataExport: !Ref "AWS::NoValue"
+          Id: EntireBucket
       LifecycleConfiguration:
         Rules:
           - Id: !Sub "${AWS::StackName}-source-archive"
@@ -609,7 +610,7 @@ Resources:
                 Value: GLACIER
             Status: Enabled
             Transitions:
-            - TransitionInDays: 5
+            - TransitionInDays: 30
               StorageClass: GLACIER
           - Id: !Sub "${AWS::StackName}-source-deep-archive"
             TagFilters:
@@ -617,7 +618,7 @@ Resources:
                 Value: DEEP_ARCHIVE
             Status: Enabled
             Transitions:
-            - TransitionInDays: 5
+            - TransitionInDays: 30
               StorageClass: DEEP_ARCHIVE
           -
             Id: !Sub ${AWS::StackName}-source-expire
@@ -656,14 +657,9 @@ Resources:
       Tags:
         - Key: env
           Value: !Ref Environment
-      AnalyticsConfigurations:
-        -
-          Id: !Sub ${AWS::StackName}-analytics
-          StorageClassAnalysis: 
-            DataExport: !Ref "AWS::NoValue"
       MetricsConfigurations:
         -
-          Id: !Sub ${AWS::StackName}-metrics
+          Id: EntireBucket
       LoggingConfiguration:
         DestinationBucketName: !Sub "${AWS::Region}-spar-logging"
         LogFilePrefix: s3/
@@ -759,6 +755,7 @@ Resources:
         HttpVersion: http2
         Aliases:
           - !Ref CloudFrontAlias
+          - !Ref CloudFrontAlias2
         Origins:
           - DomainName: !Sub "${Destination}.s3.${AWS::Region}.amazonaws.com"
             Id: vodS3Origin

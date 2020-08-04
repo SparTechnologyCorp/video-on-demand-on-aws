@@ -22,6 +22,7 @@ aws cloudformation deploy --no-execute-changeset --s3-bucket staging-vod-us-east
 --role-arn role-to-execute-this-template-arn \
 --parameter-overrides WorkflowTrigger=MetadataFile \
   CloudFrontAlias=videos.myapp.com \
+  CloudFrontAlias2=v.myapp.com \
   CloudFrontCertARN=arn:aws:acm:us-east-1:my-acm-cert \
   SNSNewVideoCallbackURL=https://webhooks.myapp.com/new_video \
   SNSWorkflowCallbackURL=https://webhooks.myapp.com/vod_status \

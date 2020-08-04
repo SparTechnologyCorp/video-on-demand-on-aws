@@ -150,6 +150,7 @@ exports.handler = async (event) => {
                 'Queue': process.env.MediaConvertQueue,
                 'Workflow': event.workflowName
             },
+            BillingTagsSource: "JOB_TEMPLATE",
             Settings: {
                 Inputs: [{
                     AudioSelectors: {
